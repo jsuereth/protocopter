@@ -1,0 +1,72 @@
+package org.protocopter.lang.core
+
+import scala.actors.Actor  
+import scala.actors.Future
+
+import core.impl._
+
+
+import org.junit._
+import Assert._
+
+class TestProtocopterObject {
+  @Test
+  def prototypeMustHaveNewSlots {
+    val pObj = BaseObject.prototype
+    assertNotSame("BaseObject is not different than prototype", BaseObject, pObj)
+    
+    val arg1 = BaseObject.prototype
+    val arg2 = BaseObject.prototype
+    val slot1 = "hai"
+    val slot2 = "hay"
+    
+    pObj.set(slot1, arg1)
+    
+    assertEquals("Failed to set slot on object", arg1, pObj.lookup(slot1)())
+    
+    var notFoundException = false
+    try {
+      //TODO - check x for exception...
+      val x = BaseObject.lookup(slot1)()
+      System.err.println(x)
+    } catch {
+      case t => notFoundException = true
+    }
+    assertTrue("Found slot on parent object after setting on child", notFoundException)
+    
+    ()
+  }
+  
+   @Test
+  def prototypeMustInheritSlots {
+    val pObj = BaseObject.prototype
+    val pObj2 = pObj.prototype
+    assertNotSame("BaseObject is not different than prototype", BaseObject, pObj)
+    
+    val arg1 = BaseObject.prototype
+    val slot1 = "hai"
+    
+    pObj.set(slot1, arg1)
+    
+    assertEquals("Failed to find slot from prototype", arg1, pObj2.lookup(slot1)())
+    ()
+  }
+  @Test
+  def mustUpdatePrototypeList {
+    val pObj = BaseObject.prototype
+    val pObj2 = BaseObject.prototype
+    
+    ()
+  }
+  
+  @Test
+  def mustSetValue() {
+    val pObj = BaseObject.prototype
+    val otherObj = BaseObject.prototype
+    val slotname = "hai"
+    
+    pObj.set(slotname, otherObj)
+    assertNotSame("Objects should not be equal", pObj, otherObj)
+    assertEquals("Failed to set slot on object", otherObj, pObj.lookup(slotname)())
+  }
+}
