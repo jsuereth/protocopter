@@ -1,0 +1,10 @@
+# eclipse conf file
+.settings
+.classpath
+.project
+.manager
+.metadata
+
+# maven building
+target
+
