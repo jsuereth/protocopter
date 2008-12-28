@@ -1,0 +1,10 @@
+<assembly>
+  <id>protocopter-dist-zip</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <baseDirectory>protocopter</baseDirectory>  
+  <componentDescriptors>
+    <componentDescriptor>src/main/assembly/MainComponent.xml</componentDescriptor>
+  </componentDescriptors>
+</assembly>

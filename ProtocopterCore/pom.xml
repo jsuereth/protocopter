@@ -14,7 +14,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.scala-lang</groupId>
-			<artifactId>scala-compiler</artifactId>
+			<artifactId>scala-library</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
