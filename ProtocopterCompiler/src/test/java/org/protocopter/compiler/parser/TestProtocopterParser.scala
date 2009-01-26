@@ -75,10 +75,10 @@ class TestProtocopterParser extends ProtocopterParser {
     }
   }
   @Test
-  def mustParseClosure() {
+  def mustParseCodeBlock() {
     val closureString = """{ |x| x; }"""
     parseHelper(parseAll(expr, closureString)) {
-      case Closure(Some(Arguments(List(arg))), List(DirectIdentifier(slotName))) =>
+      case ArgumentCodeBlock(Arguments(List(arg)), List(DirectIdentifier(slotName))) =>
         assertEquals("Failed to parse arguments", "x", arg)
         assertEquals("Failed to parse slot Access", "x", slotName)
     }
@@ -97,7 +97,7 @@ class TestProtocopterParser extends ProtocopterParser {
   def mustParseInterestingClosure() {
     val closureString = """{ |x,y| x;y; }"""
     parseHelper(parseAll(expr, closureString)) {
-      case Closure(Some(Arguments(List(x,y))), List(DirectIdentifier(x2),DirectIdentifier(y2))) =>
+      case ArgumentCodeBlock(Arguments(List(x,y)), List(DirectIdentifier(x2),DirectIdentifier(y2))) =>
         assertEquals("Failed to parse arguments", "x", x)
         assertEquals("Failed to parse arguments", "y", y)
         assertEquals("Failed to parse statement1", "x", x2)
@@ -113,7 +113,7 @@ class TestProtocopterParser extends ProtocopterParser {
            y 
 }"""
     parseHelper(parseAll(expr, closureString)) {
-      case Closure(Some(Arguments(List(x,y))), List(DirectIdentifier(x2),DirectIdentifier(y2))) =>
+      case ArgumentCodeBlock(Arguments(List(x,y)), List(DirectIdentifier(x2),DirectIdentifier(y2))) =>
         assertEquals("Failed to parse arguments", "x", x)
         assertEquals("Failed to parse arguments", "y", y)
         assertEquals("Failed to parse statement1", "x", x2)
