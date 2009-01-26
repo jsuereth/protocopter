@@ -8,13 +8,13 @@ import ReflectionUtil._
  * 
  * SHOULD NOT be used for Strings, Doubles, Integers, Floats, Booleans and Longs
  */
-class JVMObjectWrapper(val obj : AnyRef) extends ProtocopterObject {
+class JVMObjectWrapper(val obj : AnyRef) {
   
     override def toString = "Wrapped(" + obj.toString + ")"
     /**
      * Sends a message to this object (with the optional arguments)
      */
-    override def lookup(name : String) : Future[ProtocopterObject] = {
+    def lookup(name : String) : Future[ProtocopterObject] = {
       Futures.future(lookupLocal(name))
     }
     
@@ -22,11 +22,11 @@ class JVMObjectWrapper(val obj : AnyRef) extends ProtocopterObject {
       getFieldValueOrMethods(name, obj) match {
         //TODO - AutoBox/Unbox primitives...
         case Some(Left(x)) => mapJavaObjectToProtocopterObject(x)
-        case Some(Right(x)) => new JavMethodProtocopterObject(name)
+        //case Some(Right(x)) => new JavMethodProtocopterObject(name)
         case None => throw new IllegalAccessException("No slot found: " + name) 
       }
     }
-    override def execute(name : String, arg : Option[List[ProtocopterObject]]) : Future[ProtocopterObject] = {
+    def execute(name : String, arg : Option[List[ProtocopterObject]]) : Future[ProtocopterObject] = {
       def executeJavaMethod = {
 	      val args = arg.getOrElse(List())
 	      findMethod(name, args.length, obj) match {
@@ -48,22 +48,22 @@ class JVMObjectWrapper(val obj : AnyRef) extends ProtocopterObject {
       }
      Futures.future(executeJavaMethod)    
     }
-    override def set(name : String, value : ProtocopterObject)= {
+    def set(name : String, value : ProtocopterObject)= {
       //TODO - Look for setters?
       setFieldValue(obj, name, value)
     }
     
     /** Creates a prototype of this object */
-    override def prototype : ProtocopterObject = error("TODO - Not Implemented")
+    def prototype : ProtocopterObject = error("TODO - Not Implemented")
     /** Creates a closure with "this" object as the always available scope */
-    override def createClosure(args : List[String], block : ProtocopterObject => ProtocopterObject) : ProtocopterClosure = error("TODO - not implemented")
+    def createClosure(args : List[String], block : ProtocopterObject => ProtocopterObject) : ProtocopterCodeBlock = error("TODO - not implemented")
     
     /** Helper for debuggin */
-    override def slotInspectionString : String = {
+    def slotInspectionString : String = {
       obj.getClass.getCanonicalName + getSlotNames(obj).mkString(" slots(", ", ", ")")
     }
     
-    private[this] class JavMethodProtocopterObject(name : String) extends ProtocopterClosure {
+    private[this] class JavMethodProtocopterObject(name : String) {
       /**
        * Sends a message to this object (with the optional arguments)
        */
@@ -76,7 +76,7 @@ class JVMObjectWrapper(val obj : AnyRef) extends ProtocopterObject {
       /** Creates a prototype of this object */
       def prototype : ProtocopterObject = throw new IllegalAccessException("Java methods cannot be prototyped! (yet)")
       /** Creates a closure with "this" object as the always available scope */
-      def createClosure(args : List[String], block : ProtocopterObject => ProtocopterObject) : ProtocopterClosure = {
+      def createClosure(args : List[String], block : ProtocopterObject => ProtocopterObject) : ProtocopterCodeBlock = {
         throw new IllegalAccessException("Java methods cannot be used for creating closures!")
       }
     

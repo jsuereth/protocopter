@@ -3,7 +3,6 @@ package org.protocopter.lang.core.helpers
 import org.junit._
 import Assert._
 
-import CallFromScalaHelpers._
 class TestJVMObjectWrapper {
 
   @Test
