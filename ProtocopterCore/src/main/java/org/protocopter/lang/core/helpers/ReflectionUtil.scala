@@ -11,15 +11,34 @@ object ReflectionUtil {
   val BOOL_TYPE = classOf[Boolean]
   val OBJ_TYPE = classOf[Object]
   
+  import impl._
+  def proto2string(obj : ProtocopterObject) : String = obj match {
+    case BooleanObject(value) => value.toString
+    case StringObject(value) => value
+    case IntObject(value) => value.toString
+    case NilObject() => ""
+    case _ => "" //TODO - To Strings...
+  }
+  def proto2bool(obj : ProtocopterObject) : Boolean = obj match {    
+    case BooleanObject(value) => value
+    case StringObject(value) => value != null && !value.isEmpty
+    case IntObject(value) => value != 0
+    case NilObject() => false
+    case _ => true
+  }
   
+  def proto2int(obj : ProtocopterObject) : Int = obj match {
+    case IntObject(value) => value
+    case _ => 0
+  }
   /**
    * Maps a protocopter object into a java type.
    */
   def mapProtocoperObjectToJavaObject[A](obj : ProtocopterObject, clazz : Class[A]) : A = {    
     clazz match {
-      //case STRING_TYPE => proto2string(obj).asInstanceOf[A]
-      //case BOOL_TYPE => proto2bool(obj).asInstanceOf[A]
-      //case INT_TYPE => proto2int(obj).asInstanceOf[A]
+      case STRING_TYPE => proto2string(obj).asInstanceOf[A]
+      case BOOL_TYPE => proto2bool(obj).asInstanceOf[A]
+      case INT_TYPE => proto2int(obj).asInstanceOf[A]
       case OBJ_TYPE => obj.asInstanceOf[A]
       case _ => throw new IllegalArgumentException("cannot cast protocopter objec to: " + clazz) 
     }
@@ -31,7 +50,7 @@ object ReflectionUtil {
   def mapJavaObjectToProtocopterObject[A](value : A) : ProtocopterObject = {
     import impl._
     value match {
-      //case x : Boolean => BooleanPrototype.makeBooleanObject(x)
+      case x : Boolean => new BooleanObject(x)
       case x : String => new StringObject(x)
       case x : Int => new IntObject(x)
       //case x : Double => new DoubleObject(x)

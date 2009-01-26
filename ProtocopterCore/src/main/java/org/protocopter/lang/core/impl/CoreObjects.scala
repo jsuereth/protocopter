@@ -93,6 +93,10 @@ case class IntObject(value : Int) extends PrototypedObject(BaseObject) {
 /** For now, case class for string objects...*/
 case class StringObject(value : String) extends PrototypedObject(BaseObject) {
 }
+/** Case classes for boolean objects */
+case class BooleanObject(value : Boolean) extends PrototypedObject(BaseObject) {
+  
+}
 
 
 abstract class CodeBlockObject extends PrototypedObject(BaseObject) with ProtocopterCodeBlock {
