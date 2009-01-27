@@ -121,6 +121,48 @@ class TestProtocopterParser extends ProtocopterParser {
     }
   }
   
+    @Test
+  def mustParseInterestingCodeBlockEOLs() {
+    val closureString = """{ 
+           x
+           y 
+}"""
+    parseHelper(parseAll(expr, closureString)) {
+      case CodeBlock(List(DirectIdentifier(x2),DirectIdentifier(y2))) =>
+        assertEquals("Failed to parse statement1", "x", x2)
+        assertEquals("Failed to parse statment2", "y", y2)
+    }
+  }
+  @Test
+  def mustParseInterestingClosureEOLs() {
+    val closureString = """[ 
+           x
+           y 
+]"""
+    parseHelper(parseAll(expr, closureString)) {
+      case Closure(List(DirectIdentifier(x2),DirectIdentifier(y2))) =>
+        assertEquals("Failed to parse statement1", "x", x2)
+        assertEquals("Failed to parse statment2", "y", y2)
+    }
+  }
+  
+  @Test
+  def mustParseInterestingClosureWithArgsEOLs() {
+    val closureString = """[ 
+           |x, y| 
+           x
+           y 
+]"""
+    parseHelper(parseAll(expr, closureString)) {
+      case ArgumentClosure(Arguments(List(x,y)), List(DirectIdentifier(x2),DirectIdentifier(y2))) =>
+        assertEquals("Failed to parse arguments", "x", x)
+        assertEquals("Failed to parse arguments", "y", y)
+        assertEquals("Failed to parse statement1", "x", x2)
+        assertEquals("Failed to parse statment2", "y", y2)
+    }
+  }
+  
+  
   @Test
   def mustParseAssignment() {
     val assignmentString = """x <- y;"""

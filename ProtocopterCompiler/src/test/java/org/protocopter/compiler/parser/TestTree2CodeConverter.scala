@@ -26,7 +26,24 @@ class TestTree2CodeConverter extends ProtocopterParser with Tree2CodeConverter {
   def musttranslateAssignment() {
 	val assignmentString = """x <- y;"""
     parseHelper(parseAll(statement, assignmentString)) {
-      case x => Console.println(x)
+      case x => 
+        Console.println(assignmentString )
+        Console.println("---Converts To ---")
+        Console.println(x)
+    }
+  }
+  
+    @Test
+  def musttranslateCodeBlock() {
+	val assignmentString = """z <- { 
+     x <- y 
+}
+"""
+    parseHelper(parseAll(statement, assignmentString)) {
+      case x => 
+        Console.println(assignmentString )
+        Console.println("---Converts To ---")
+        Console.println(x)
     }
   }
 }
