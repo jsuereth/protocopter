@@ -38,7 +38,7 @@ trait Tree2CodeConverter {
   
   def mapExpression(node : ASTNode) : List[pcode.PCodeInstruction] = {
     node match {
-      case Literal(l) => List(pcode.PushLiteralInstruction(node))      
+      case Literal(l) => List(pcode.PushLiteralInstruction(l))      
       case DirectIdentifier(name) => List(pcode.PushLiteralInstruction(name), pcode.PushReferenceInstruction())
       case IndirectIdentifer(expr) => mapExpression(expr) ::: List(pcode.PushReferenceInstruction())
       case CodeBlock(block) => List(pcode.PushCodeBlock(map(block)))

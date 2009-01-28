@@ -8,6 +8,8 @@ abstract class AbstractProtocopterObject extends ProtocopterObject {
      * Looks for a given slot on an object.  Returns "None" if it is undefined.
      */
     override def lookup(name : String) : Option[ProtocopterObject] = {
+      //TODO - Look up on parents.  If exists, create proxy-to-parent slot?...
+      
       //Check ourselves first, then defer to parents.
       if(slots.contains(name)) {
         Some(slots(name))

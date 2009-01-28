@@ -1,11 +1,10 @@
 package org.protocopter.lang.core
 
-import scala.actors._
 
 /** 
  * Trait representing any object in Protocopter.  This is the "pubic" interface for java/scala 
  */
-trait ProtocopterObject {
+trait ProtocopterObject { 
     /**
      * Sends a message to this object (with the optional arguments)
      */
