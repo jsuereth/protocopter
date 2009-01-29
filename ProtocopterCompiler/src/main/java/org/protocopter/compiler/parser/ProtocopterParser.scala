@@ -23,7 +23,7 @@ class ProtocopterParser extends RegexParsers with JavaTokenParsers {
   def eol : Parser[String] = ";" | "\n"
   
   
-  def executeClosure = "!" ~> expr ~ opt(expr) ~ opt(callArgs) ^^ { case fun ~ scope ~ args => FunctionCall(fun, scope, args) }
+  def executeClosure = "!" ~> expr ~ opt(expr) ~ opt(callArgs) ^^ { case fun ~ scope ~ args =>  FunctionCall(fun, scope, args) }
   def assign = (expr <~ "<-") ~ expr ^^ { case l ~ r => Assignment(l,r)}
   def prototypeAssign= (expr <~ "<~") ~ expr ^^ { case l ~ r => Assignment(l,Prototype(r))}
   def appendPrototype = (expr <~ "<<") ~ expr ^^ { case l ~ r => AppendPrototype(l,r)}

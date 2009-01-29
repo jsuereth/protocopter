@@ -3,14 +3,60 @@ package org.protocopter.compiler.bytecode
 import pcode._
 import _root_.org.objectweb.asm._
 
+
 /**
  * Converts pcode to java byte code.
  */
 trait JavaByteCodeConverter {
   import Opcodes._
   
+
   val POBJ_TYPE = Type.getObjectType("org/protocopter/lang/core/ProtocopterObject");
   val PENV_TYPE = Type.getObjectType("org/protocopter/lang/core/ProtocopterEnvironment");
+  private def getTypeForClass(name : String) = Type.getObjectType(name)
+  
+  
+  
+  /** Mangles a code block name */
+  private def mangleCodeBlockName(moduleName:String, codeBlockIdx : Long) = moduleName + "$$CodeBlock$$" + codeBlockIdx
+  
+  /** Compiles a module from its PCodes into JVM Byte code */
+  def compile(moduleName : String, codeBlock : List[PCodeInstruction], writer : ProtocopterClassWriter) : Unit = {
+    //TODo - take in source code    
+    for( (name,pclass) <- extractClasses(moduleName, ProtocopterModule(codeBlock)) ) {
+      writer.writeClass(name, convert(name, pclass).toByteArray)
+    }
+    
+  }
+  
+  
+  /**
+   * extracts the various compilation units needed.
+   */
+  def extractClasses(name : String, module : PClass) : List[(String, PClass)] = {
+    var idx = 1;
+    val codeBlocks = for {
+      pcode <- module.definition
+      if pcode.isInstanceOf[PushCodeBlock]
+      val PushCodeBlock(block) = pcode
+    } yield block
+    
+    val results = codeBlocks.zipWithIndex.flatMap {
+      case (block,idx) => 
+        val blockName = mangleCodeBlockName(name, idx)
+        val blockObj = ProtocopterCodeBlock(block.toList)
+        (blockName, blockObj ) :: extractClasses(blockName, blockObj )      
+    }
+    
+    (name, module) :: results
+  }
+  
+  
+  def convert(className : String, pclass : PClass) = pclass match {
+    case m @ ProtocopterModule(_) => convertModule(className, m)
+    case cb @ ProtocopterCodeBlock(_) => convertCodeBlock(className, cb)
+  }
+  
   /**
    * Creates .class file for a protocopter module
    * 
@@ -19,7 +65,7 @@ trait JavaByteCodeConverter {
    * @name The name of the module
    * @pcodes  The definition of the module
    */
-  def convert(name : String, pcodes : List[PCodeInstruction])= {
+  def convertModule(name : String, module : ProtocopterModule)= {
     val clazz = new ClassWriter(ClassWriter.COMPUTE_MAXS)
     //TODO - Debugging info?
     
@@ -44,8 +90,11 @@ trait JavaByteCodeConverter {
     val moduleMethod = clazz.visitMethod(ACC_PUBLIC | ACC_STATIC, "init",Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE)), null, null)
     moduleMethod.visitCode()
     //TODO - Insert real code instead of
-    for(pcode <- pcodes) {
-      convertInstruction(moduleMethod, pcode)
+    var idx = 0;
+    for(pcode <- module.definition) {
+      //TODO - better way of managing code block name mangling!
+      if(pcode.isInstanceOf[PushCodeBlock]) { idx += 1 }
+      convertInstruction(moduleMethod, pcode, name, idx);     
     }
     
     
@@ -64,7 +113,19 @@ trait JavaByteCodeConverter {
     clazz
   }
   
-  def convertInstruction(method : MethodVisitor, pcode : PCodeInstruction) {
+  /** Converts a code block into a class file */
+  def convertCodeBlock(name : String, codeBlock : ProtocopterCodeBlock) = {
+    val clazz = new ClassWriter(ClassWriter.COMPUTE_MAXS)
+    //TODO - Debugging info?
+    
+    //TODO - We should extend some kind of protocopter interface...?
+    clazz.visit(V1_6, ACC_PUBLIC | ACC_FINAL, name, null, "java/lang/Object", null)
+    clazz.visitEnd()
+    clazz
+  }
+  
+  /** Converts PCode instructions into corresponding JVM byte-code instructions. */
+  def convertInstruction(method : MethodVisitor, pcode : PCodeInstruction, name : String, idx : Long) : Unit = {
     pcode match {
       case PushLiteralInstruction(lit) =>
         method.visitLdcInsn(lit)
@@ -75,7 +136,7 @@ trait JavaByteCodeConverter {
         method.visitVarInsn(ALOAD, 0);
       case SlotAccessInstruction() =>
         //TODO - Convert from proco-obj to a string first...?
-        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getDescriptor(), "lookup", Type.getMethodDescriptor(POBJ_TYPE, Array()))
+        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getDescriptor(), "lookup", Type.getMethodDescriptor(POBJ_TYPE, Array(POBJ_TYPE)))
       case AssignSlot() =>
         //TODO - Convert from proco-obj to string first...?
         method.visitMethodInsn(INVOKEVIRTUAL, Type.VOID_TYPE.getDescriptor(), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE, POBJ_TYPE)))
@@ -83,7 +144,14 @@ trait JavaByteCodeConverter {
         method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getDescriptor(), "prototype", Type.getMethodDescriptor(POBJ_TYPE, Array()))
       case PushCodeBlock(block) =>
         //TODO - Write out code block as anonyomous subclass...
-        //TODO - create new instance of code block subclass
+        //create new instance of code block subclass
+        method.visitTypeInsn(NEW, getTypeForClass(mangleCodeBlockName(name, idx)).getDescriptor)
+      case ExecuteFunction() =>
+        //TODO - we need to understand how many argument there were, OR us varargs?
+      case DeleteSlot() =>
+        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getDescriptor(), "remove", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE)))
+      case PushReferenceInstruction() =>
+        //TODO - Isn't this the same as slot access?
       case _ => Console.println("Error... Unknown bytecode")
     }
   }

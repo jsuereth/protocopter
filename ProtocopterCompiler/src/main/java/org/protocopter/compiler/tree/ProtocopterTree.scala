@@ -1,7 +1,10 @@
 package org.protocopter.compiler.tree
 
 /** Base class for the protocopter Abstract Syntax tree.*/
-sealed trait ASTNode
+sealed trait ASTNode {
+  //TODO - we need to make sure our source/position is placed in correctly.
+}
+
 sealed trait Expr extends ASTNode
 
 
