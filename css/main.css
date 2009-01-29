@@ -20,6 +20,7 @@ body {
 	clear: none;
 	float: left;
 	dispay: block;
+	text-align: center;
 }
 
 .menu li {
