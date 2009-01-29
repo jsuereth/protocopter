@@ -22,6 +22,11 @@ body {
 	dispay: block;
 	text-align: center;
 }
+.menu ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
 
 .menu li {
 	color: #113344;
@@ -38,7 +43,7 @@ body {
 }
 
 .menu li:hover a {
-	color: #884422;
+	color: #DC7643;
 }
 
 .menu li a {
