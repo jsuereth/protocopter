@@ -95,9 +95,9 @@ trait JavaByteCodeConverter {
     //TODO - Insert real code instead of
     var idx = 0;
     for(pcode <- module.definition) {
-      //TODO - better way of managing code block name mangling!
-      if(pcode.isInstanceOf[PushCodeBlock]) { idx += 1 }
+      //TODO - better way of managing code block names!      
       convertInstruction(moduleMethod, pcode, name, idx);     
+      if(pcode.isInstanceOf[PushCodeBlock]) { idx += 1 }
     }
     
     
