@@ -11,9 +11,12 @@ trait JavaByteCodeConverter {
   import Opcodes._
   
 
-  val POBJ_TYPE = Type.getObjectType("org/protocopter/lang/core/ProtocopterObject");
-  val PENV_TYPE = Type.getObjectType("org/protocopter/lang/core/ProtocopterEnvironment");
-  private def getTypeForClass(name : String) = Type.getObjectType(name)
+  val POBJ_TYPE = Type.getObjectType("org/protocopter/lang/core/ProtocopterObject")
+  val PENV_TYPE = Type.getObjectType("org/protocopter/lang/core/ProtocopterEnvironment")
+  val PCODE_BLOCK_TYPE = Type.getObjectType("org/protocopter/lang/impl/CodeBlockObject")
+  
+  
+  protected def getTypeForClass(name : String) = Type.getObjectType(name)
   
   
   
@@ -116,10 +119,32 @@ trait JavaByteCodeConverter {
   /** Converts a code block into a class file */
   def convertCodeBlock(name : String, codeBlock : ProtocopterCodeBlock) = {
     val clazz = new ClassWriter(ClassWriter.COMPUTE_MAXS)
-    //TODO - Debugging info?
-    
+    //TODO - Debugging info?    
     //TODO - We should extend some kind of protocopter interface...?
-    clazz.visit(V1_6, ACC_PUBLIC | ACC_FINAL, name, null, "java/lang/Object", null)
+    clazz.visit(V1_6, ACC_PUBLIC | ACC_FINAL, name, null, PCODE_BLOCK_TYPE.getInternalName, null)
+    
+    //Write constructor
+    val constructor = clazz.visitMethod(ACC_PUBLIC, name, Type.getMethodDescriptor(Type.VOID_TYPE, Array()), null, null)
+    constructor.visitCode()
+    constructor.visitVarInsn(ALOAD, 0);
+    constructor.visitMethodInsn(INVOKESPECIAL, POBJ_TYPE.getInternalName,"<init>", Type.getMethodDescriptor(Type.VOID_TYPE, Array()))
+    //Max stack is computed for us.
+    constructor.visitMaxs(0,0)
+    constructor.visitEnd()
+    
+    //Write method impl 
+    val callMethod = clazz.visitMethod(ACC_PUBLIC | ACC_STATIC, "call",Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE)), null, null)
+    callMethod.visitCode()
+    //TODO - Insert real code instead of
+    var idx = 0;
+    for(pcode <- codeBlock.definition) {
+      //TODO - better way of managing code block name mangling!
+      if(pcode.isInstanceOf[PushCodeBlock]) { idx += 1 }
+      convertInstruction(callMethod, pcode, name, idx)     
+    }
+    callMethod.visitMaxs(0,0)
+    callMethod.visitEnd()
+    
     clazz.visitEnd()
     clazz
   }
@@ -133,7 +158,7 @@ trait JavaByteCodeConverter {
         //TODO - Check to make sure we're not talking about BaseObject or other...
       case PushScopeInstruction() =>
         //Pull in the first-argument to this function which is our scope.
-        method.visitVarInsn(ALOAD, 0);
+        method.visitVarInsn(ALOAD, 0)
       case SlotAccessInstruction() =>
         //TODO - Convert from proco-obj to a string first...?
         method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getDescriptor(), "lookup", Type.getMethodDescriptor(POBJ_TYPE, Array(POBJ_TYPE)))
