@@ -18,16 +18,35 @@ body {
 	width: 100%;
 }
 
-
+.menu {
+	clear:none;
+	display:block;
+	float:left;
+	left:0px;
+	text-align:center;
+	width:200px;
+}
 .content {
-	position: relative;
-	margin-left: 220px;
+	clear:none;
+	display:block;
+	margin-left:220px;
+	margin-right:210px;
+	position:relative;
 }
 
 .widgets {
-	float: right;
-	width: 200px;
-	font-size: small;		
+	clear:none;
+	display:block;
+	float:right;
+	font-size:small;
+	position:relative;
+	right:2px;
+	top:0px;
+	width:200px;
+}
+
+.content a {
+	font-weight: bold;
 }
 
 .widgets h3 {
@@ -48,12 +67,7 @@ body {
 	margin-right: auto;
 }
 
-.menu {
-	left: 0px;
-	width: 200px;
-	float: left;
-	text-align: center;
-}
+
 .menu ul {
     list-style: none;
     margin: 0;
