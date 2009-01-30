@@ -1,11 +1,45 @@
 body {
 	background: #113344 none repeat scroll 0% 0%;
 	color: #EBC2AD;
+	font-family: courier serif;
 }
 
 .header {
 	border-bottom: 2px solid #884422;
 	text-align: center;
+}
+
+.footer  {
+	margin-top: 10px;
+	border-top: 2px solid #884422;
+	text-align: right;
+	display: block;
+	float: left;
+	width: 100%;
+}
+
+
+.content {
+	position: relative;
+	margin-left: 220px;
+}
+
+.widgets {
+	float: right;
+	width: 200px;
+	font-size: small;		
+}
+
+.widgets h3 {
+	color: #CC6633;
+	border-bottom: 1px solid  #CC6633;
+	padding-bottom: 5px;
+}
+
+.footer h3 {
+	font-weight: normal;
+	font-size: small;
+	font-style: italic;
 }
 
 .header img {
@@ -17,9 +51,7 @@ body {
 .menu {
 	left: 0px;
 	width: 200px;
-	clear: none;
 	float: left;
-	dispay: block;
 	text-align: center;
 }
 .menu ul {
@@ -42,23 +74,15 @@ body {
 	
 }
 
-.menu li:hover a {
+a:hover {
 	color: #DC7643;
 }
 
-.menu li a {
+a {
 	color: #CC6633;
 	text-decoration: none;
 }
 
-.content {
-	clear: none;
-	display: block;
-	position: relative;
-	top: 0px;
-	float: left;
-	margin-left: 2em;
-}
 
 .mainColor {
 	color: #3399CC;
