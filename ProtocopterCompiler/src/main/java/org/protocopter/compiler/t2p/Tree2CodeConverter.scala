@@ -11,6 +11,7 @@ trait Tree2CodeConverter {
   }
   
   def mapStatement(node : ASTNode) : List[pcode.PCodeInstruction] = {
+    //todo - extract debug info
     node match {
       case FunctionCall(f,Some(self),Some(args)) => Nil //TODO - we don't  handle agument lists yet...
       case FunctionCall(f,None,Some(args)) => Nil //TODO - We don't handle argument lists yet

@@ -1,0 +1,58 @@
+#!/bin/sh
+
+cygwin=false;
+case "`uname`" in
+    CYGWIN*) cygwin=true ;;
+esac
+
+# Finding the root folder for this Protocopter distribution
+SOURCE=$0;
+SCRIPT=`basename "$SOURCE"`;
+while [ -h "$SOURCE" ]; do
+    SCRIPT=`basename "$SOURCE"`;
+    LOOKUP=`ls -ld "$SOURCE"`;
+    TARGET=`expr "$LOOKUP" : '.*-> \(.*\)$'`;
+    if expr "${TARGET:-.}/" : '/.*/$' > /dev/null; then
+        SOURCE=${TARGET:-.};
+    else
+        SOURCE=`dirname "$SOURCE"`/${TARGET:-.};
+    fi;
+done;
+PROTOCOPTER_HOME=`dirname "$SOURCE"`/..;
+PROTOCOPTER_HOME=`cd "$PROTOCOPTER_HOME"; pwd`;
+# Remove spaces from PROTOCOPTER_HOME on windows
+if $cygwin; then
+    PROTOCOPTER_HOME=`cygpath --windows --short-name "$PROTOCOPTER_HOME"`
+    PROTOCOPTER_HOME=`cygpath --unix "$PROTOCOPTER_HOME"`
+fi
+
+# Constructing the extension classpath
+TOOL_CLASSPATH=""
+if [ -z "$TOOL_CLASSPATH" ] ; then
+    for ext in `ls -d "$PROTOCOPTER_HOME"/lib/*` ; do
+        if [ -z "$TOOL_CLASSPATH" ] ; then
+            TOOL_CLASSPATH="$ext"
+        else
+            TOOL_CLASSPATH="$TOOL_CLASSPATH:$ext"
+        fi
+    done
+fi
+
+if $cygwin; then
+    if [ "$OS" = "Windows_NT" ] && cygpath -m .>/dev/null 2>/dev/null ; then
+        format=mixed
+    else
+        format=windows
+    fi
+    PROTOCOPTER_HOME=`cygpath --$format "$PROTOCOPTER_HOME"`
+    TOOL_CLASSPATH=`cygpath --path --$format "$TOOL_CLASSPATH"`
+fi
+
+# Reminder: substitution ${JAVA_OPTS:=-Xmx256M -Xms16M} DO NOT work on Solaris
+[ -n "$JAVA_OPTS" ] || JAVA_OPTS="-Xmx256M -Xms32M"
+
+if [ -z "$JAVACMD" -a -n "$JAVA_HOME" -a -x "$JAVA_HOME/bin/java" ]; then
+    JAVACMD="$JAVA_HOME/bin/java"
+fi
+
+exec "${JAVACMD:=java}" $JAVA_OPTS -cp "$TOOL_CLASSPATH" -Dprotocopter.home="$PROTOCOPTER_HOME" -Denv.classpath="$CLASSPATH" -Denv.emacs="$EMACS"  org.protocopter.compiler.ProtocopterCompiler  "$@"

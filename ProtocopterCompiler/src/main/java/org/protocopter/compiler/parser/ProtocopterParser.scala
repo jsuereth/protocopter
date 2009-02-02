@@ -13,7 +13,7 @@ class ProtocopterParser extends RegexParsers with JavaTokenParsers {
   
   def module = rep(statement)
   
-  def statement : Parser[ASTNode] = (executeClosure
+  def statement : Parser[ASTNode] = positioned(executeClosure
                                      | assign
                                      | prototypeAssign
                                      | appendPrototype

@@ -1,7 +1,9 @@
 package org.protocopter.compiler.tree
 
+
+import scala.util.parsing.input._
 /** Base class for the protocopter Abstract Syntax tree.*/
-sealed trait ASTNode {
+sealed trait ASTNode extends Positional {
   //TODO - we need to make sure our source/position is placed in correctly.
 }
 

@@ -1,7 +1,11 @@
 package org.protocopter.compiler.pcode
 
+
 /** Abstract interface for all "Protocopter ByteCodes" or pcodes */
 sealed trait PCodeInstruction
+
+
+case class DebugMetaInstruction(sourceLine:String, lineNum:Int)
 
 case class PushReferenceInstruction() extends PCodeInstruction
 case class SlotAccessInstruction() extends PCodeInstruction

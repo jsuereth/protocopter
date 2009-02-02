@@ -101,9 +101,9 @@ trait JavaByteCodeConverter {
     }
     
     
-    moduleMethod.visitFieldInsn(GETSTATIC, "java/lang/System","out",Type.getDescriptor(System.out.getClass))
-    moduleMethod.visitLdcInsn("HAI WURLD!")
-    moduleMethod.visitMethodInsn(INVOKEVIRTUAL, Type.getDescriptor(classOf[java.io.PrintStream]), "println", Type.getMethodDescriptor(Type.VOID_TYPE, Array(Type.getType(classOf[Object]))))
+//    moduleMethod.visitFieldInsn(GETSTATIC, "java/lang/System","out",Type.getDescriptor(System.out.getClass))
+//    moduleMethod.visitLdcInsn("HAI WURLD!")
+//    moduleMethod.visitMethodInsn(INVOKEVIRTUAL, Type.getDescriptor(classOf[java.io.PrintStream]), "println", Type.getMethodDescriptor(Type.VOID_TYPE, Array(Type.getType(classOf[Object]))))
     moduleMethod.visitInsn(RETURN)
     //The actual values are calculated for us, we just need to call the visitor.
     moduleMethod.visitMaxs(0,0)
