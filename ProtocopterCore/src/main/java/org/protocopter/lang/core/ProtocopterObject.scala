@@ -6,14 +6,21 @@ package org.protocopter.lang.core
  */
 trait ProtocopterObject { 
     /**
-     * Sends a message to this object (with the optional arguments)
+     * Looks up a slot from this object.
      */
-    def lookup(name : String) : Option[ProtocopterObject]
-    def set(name : String, value : ProtocopterObject)        
-    /** Creates a prototype of this object */
-    def prototype : ProtocopterObject
-    
-    def listSlots() : List[String]
+    def lookup(name : ProtocopterObject) : Option[ProtocopterObject]
+    /**
+     * Removes a slot from this object
+     */
+    def remove(name : ProtocopterObject)
+    /**
+     * Sets the value of a slot on this obejct
+     */
+    def set(name : ProtocopterObject, value : ProtocopterObject)        
+    /** 
+     * Creates a prototype of this object 
+     */
+    def prototype : ProtocopterObject    
 }
 
 

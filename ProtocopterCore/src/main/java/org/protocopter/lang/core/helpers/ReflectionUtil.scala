@@ -31,6 +31,12 @@ object ReflectionUtil {
     case IntObject(value) => value
     case _ => 0
   }
+  
+  def proto2double(obj : ProtocopterObject) : Double = obj match {
+    case DoubleObject(value) => value
+    case _ => 0.0
+  }
+  
   /**
    * Maps a protocopter object into a java type.
    */
@@ -39,7 +45,10 @@ object ReflectionUtil {
       case STRING_TYPE => proto2string(obj).asInstanceOf[A]
       case BOOL_TYPE => proto2bool(obj).asInstanceOf[A]
       case INT_TYPE => proto2int(obj).asInstanceOf[A]
-      case OBJ_TYPE => obj.asInstanceOf[A]
+      case DOUBLE_TYPE => proto2double(obj).asInstanceOf[A]
+      case OBJ_TYPE =>
+        //TODO - Try to wrap 
+        obj.asInstanceOf[A]
       case _ => throw new IllegalArgumentException("cannot cast protocopter objec to: " + clazz) 
     }
   }
@@ -53,6 +62,7 @@ object ReflectionUtil {
       case x : Boolean => new BooleanObject(x)
       case x : String => new StringObject(x)
       case x : Int => new IntObject(x)
+      case x : ProtocopterObject => x
       //case x : Double => new DoubleObject(x)
       //case x : AnyRef => new JVMObjectWrapper(x)
       case _ => throw new UnsupportedOperationException("Cannot convert " + value + " to protocopter")

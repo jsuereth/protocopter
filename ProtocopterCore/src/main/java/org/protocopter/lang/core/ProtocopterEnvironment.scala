@@ -2,9 +2,21 @@ package org.protocopter.lang.core
 
 
 
-object ProtocopterEnvironment {
+object ProtocopterEnvironment extends impl.BoxingUtil {
+  /**
+   * Returns the current execution context
+   */
   def current : ProtocopterObject = {
     import impl._
     BaseObject.prototype
   }
+  
+  def createNewProtocopterObject = {
+    import impl._
+    new CoreObject
+  }
+  
+  
+  
+  
 }

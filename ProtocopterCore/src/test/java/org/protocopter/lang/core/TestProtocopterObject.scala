@@ -10,6 +10,7 @@ import org.junit._
 import Assert._
 
 class TestProtocopterObject {
+  import ProtocopterEnvironment._
   @Test
   def prototypeMustHaveNewSlots {
     val pObj = BaseObject.prototype
@@ -18,10 +19,10 @@ class TestProtocopterObject {
     val arg1 = BaseObject.prototype
     val slot1 = "hai"
     
-    pObj.set(slot1, arg1)
+    pObj.set(box(slot1), arg1)
     
-    assertEquals("Failed to set slot on object", arg1, pObj.lookup(slot1).getOrElse(null))    
-    assertTrue("Found slot on parent object after setting on child", BaseObject.lookup(slot1).isEmpty)
+    assertEquals("Failed to set slot on object", arg1, pObj.lookup(box(slot1)).getOrElse(null))    
+    assertTrue("Found slot on parent object after setting on child", BaseObject.lookup(box(slot1)).isEmpty)
     
     ()
   }
@@ -35,9 +36,9 @@ class TestProtocopterObject {
     val arg1 = BaseObject.prototype
     val slot1 = "hai"
     
-    pObj.set(slot1, arg1)
+    pObj.set(box(slot1), arg1)
     
-    assertEquals("Failed to find slot from prototype", arg1, pObj2.lookup(slot1).get())
+    assertEquals("Failed to find slot from prototype", arg1, pObj2.lookup(box(slot1)).get())
     ()
   }
   @Test
@@ -54,8 +55,8 @@ class TestProtocopterObject {
     val otherObj = BaseObject.prototype
     val slotname = "hai"
     
-    pObj.set(slotname, otherObj)
+    pObj.set(box(slotname), otherObj)
     assertNotSame("Objects should not be equal", pObj, otherObj)
-    assertEquals("Failed to set slot on object", otherObj, pObj.lookup(slotname).get())
+    assertEquals("Failed to set slot on object", otherObj, pObj.lookup(box(slotname)).get())
   }
 }

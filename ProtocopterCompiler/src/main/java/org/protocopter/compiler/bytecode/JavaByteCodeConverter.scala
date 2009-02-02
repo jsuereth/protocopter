@@ -10,7 +10,7 @@ import _root_.org.objectweb.asm._
 trait JavaByteCodeConverter {
   import Opcodes._
   
-
+  val JOBJ_TYPE = Type.getObjectType("java/lang/Object")
   val POBJ_TYPE = Type.getObjectType("org/protocopter/lang/core/ProtocopterObject")
   val PENV_TYPE = Type.getObjectType("org/protocopter/lang/core/ProtocopterEnvironment")
   val PCODE_BLOCK_TYPE = Type.getObjectType("org/protocopter/lang/impl/CodeBlockObject")
@@ -149,13 +149,22 @@ trait JavaByteCodeConverter {
     clazz
   }
   
+  def getClassForLiteral(lit : Any) : Class[_]=  lit match {
+    case x : AnyRef => x.getClass
+    case x : Int => classOf[Int]
+    case x : Double => classOf[Double]
+    case x : Boolean => classOf[Boolean]
+    case x : Byte => classOf[Byte]
+  }
+  
   /** Converts PCode instructions into corresponding JVM byte-code instructions. */
   def convertInstruction(method : MethodVisitor, pcode : PCodeInstruction, name : String, idx : Long) : Unit = {
     pcode match {
       case PushLiteralInstruction(lit) =>
         method.visitLdcInsn(lit)
         //TODO - Should we convert to ProtocopterObject before returning?
-        //TODO - Check to make sure we're not talking about BaseObject or other...
+        //TODO - Check to make sure we're not talking about BaseObject or other...  
+        method.visitMethodInsn(INVOKESTATIC, PENV_TYPE.getDescriptor(),"box",Type.getMethodDescriptor(POBJ_TYPE, Array(Type.getType(getClassForLiteral(lit)))))
       case PushScopeInstruction() =>
         //Pull in the first-argument to this function which is our scope.
         method.visitVarInsn(ALOAD, 0)
