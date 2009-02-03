@@ -6,12 +6,12 @@ object ProtocopterEnvironment extends impl.BoxingUtil {
   /**
    * Returns the current execution context
    */
-  def current : ProtocopterObject = {
+  def current() : ProtocopterObject = {
     import impl._
     BaseObject.prototype
   }
   
-  def createNewProtocopterObject = {
+  override def createNewProtocopterObject() = {
     import impl._
     new CoreObject
   }

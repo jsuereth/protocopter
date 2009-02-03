@@ -21,8 +21,13 @@ class TestProtocopterObject {
     
     pObj.set(box(slot1), arg1)
     
-    assertEquals("Failed to set slot on object", arg1, pObj.lookup(box(slot1)).getOrElse(null))    
-    assertTrue("Found slot on parent object after setting on child", BaseObject.lookup(box(slot1)).isEmpty)
+    assertEquals("Failed to set slot on object", arg1, pObj.lookup(box(slot1)))
+    try {
+      BaseObject.lookup(box(slot1))
+      assertTrue("Found slot on parent object after setting on child", false)
+    } catch {
+      case ignore =>
+    }
     
     ()
   }
@@ -38,7 +43,7 @@ class TestProtocopterObject {
     
     pObj.set(box(slot1), arg1)
     
-    assertEquals("Failed to find slot from prototype", arg1, pObj2.lookup(box(slot1)).get())
+    assertEquals("Failed to find slot from prototype", arg1, pObj2.lookup(box(slot1)))
     ()
   }
   @Test
@@ -57,6 +62,6 @@ class TestProtocopterObject {
     
     pObj.set(box(slotname), otherObj)
     assertNotSame("Objects should not be equal", pObj, otherObj)
-    assertEquals("Failed to set slot on object", otherObj, pObj.lookup(box(slotname)).get())
+    assertEquals("Failed to set slot on object", otherObj, pObj.lookup(box(slotname)))
   }
 }

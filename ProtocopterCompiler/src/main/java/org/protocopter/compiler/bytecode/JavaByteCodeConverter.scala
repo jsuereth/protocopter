@@ -13,11 +13,11 @@ trait JavaByteCodeConverter {
   val JOBJ_TYPE = Type.getObjectType("java/lang/Object")
   val POBJ_TYPE = Type.getObjectType("org/protocopter/lang/core/ProtocopterObject")
   val PENV_TYPE = Type.getObjectType("org/protocopter/lang/core/ProtocopterEnvironment")
-  val PCODE_BLOCK_TYPE = Type.getObjectType("org/protocopter/lang/impl/CodeBlockObject")
+  val PCODE_BLOCK_TYPE = Type.getObjectType("org/protocopter/lang/core/impl/CodeBlockObject")
   
   
   protected def getTypeForClass(name : String) = Type.getObjectType(name)
-  
+  protected def getInternalName(name : String) = name //TODO - Replace all . with /
   
   
   /** Mangles a code block name */
@@ -69,7 +69,10 @@ trait JavaByteCodeConverter {
    * @pcodes  The definition of the module
    */
   def convertModule(name : String, module : ProtocopterModule)= {
-    val clazz = new ClassWriter(ClassWriter.COMPUTE_MAXS)
+    
+    val outerClazzWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS)  
+    import _root_.org.objectweb.asm.util.CheckClassAdapter
+    val clazz = new CheckClassAdapter(outerClazzWriter)
     //TODO - Debugging info?
     
     //TODO - We should extend some kind of protocopter interface...?
@@ -80,19 +83,12 @@ trait JavaByteCodeConverter {
     //TODO - java main class should call "loadModule" method
     val mainMethod = clazz.visitMethod(ACC_PUBLIC | ACC_STATIC | ACC_VARARGS, "main", Type.getMethodDescriptor(Type.VOID_TYPE, Array(Type.getType(classOf[Array[String]]))), null, null)
     mainMethod.visitCode()
-
-    mainMethod.visitFieldInsn(GETSTATIC, "java/lang/System","out",Type.getDescriptor(System.out.getClass))
-    mainMethod.visitLdcInsn("Loading Environment")
-    mainMethod.visitMethodInsn(INVOKEVIRTUAL, Type.getDescriptor(classOf[java.io.PrintStream]), "println", Type.getMethodDescriptor(Type.VOID_TYPE, Array(Type.getType(classOf[Object]))))
-    mainMethod.visitMethodInsn(INVOKESTATIC, PENV_TYPE.getInternalName,"current",Type.getMethodDescriptor(POBJ_TYPE, Array()))
     
-    //TODO - Add script arguments to "scope" object from current... 
-    mainMethod.visitFieldInsn(GETSTATIC, "java/lang/System","out",Type.getDescriptor(System.out.getClass))
-    mainMethod.visitLdcInsn("Initializing Module")
-    mainMethod.visitMethodInsn(INVOKEVIRTUAL, Type.getDescriptor(classOf[java.io.PrintStream]), "println", Type.getMethodDescriptor(Type.VOID_TYPE, Array(Type.getType(classOf[Object]))))
+    //Load current runtime environment
+    mainMethod.visitMethodInsn(INVOKESTATIC, "org/protocopter/lang/core/ProtocopterEnvironment", "current", Type.getMethodDescriptor(POBJ_TYPE, Array()))
+    //TODO - Add script arguments to "scope" object from current...     
     
-    
-    //mainMethod.visitMethodInsn(INVOKESTATIC, Type.getObjectType(name).getDescriptor(), "init", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE)))
+    mainMethod.visitMethodInsn(INVOKESTATIC, name, "init", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE)))
     mainMethod.visitInsn(RETURN)
     //The actual values are calculated for us, we just need to call the visitor.
     mainMethod.visitMaxs(0,0)
@@ -121,12 +117,14 @@ trait JavaByteCodeConverter {
     //TODO - Create "loadModule" method with actual code.
     
     clazz.visitEnd()
-    clazz
+    outerClazzWriter
   }
   
   /** Converts a code block into a class file */
   def convertCodeBlock(name : String, codeBlock : ProtocopterCodeBlock) = {
-    val clazz = new ClassWriter(ClassWriter.COMPUTE_MAXS)
+    val outerClazzWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS)  
+    import _root_.org.objectweb.asm.util.CheckClassAdapter
+    val clazz = new CheckClassAdapter(outerClazzWriter)
     //TODO - Debugging info?    
     //TODO - We should extend some kind of protocopter interface...?
     clazz.visit(V1_6, ACC_PUBLIC | ACC_FINAL, name, null, PCODE_BLOCK_TYPE.getInternalName, null)
@@ -156,7 +154,7 @@ trait JavaByteCodeConverter {
     callMethod.visitEnd()
     
     clazz.visitEnd()
-    clazz
+    outerClazzWriter
   }
   
   def getClassForLiteral(lit : Any) : Class[_]=  lit match {
@@ -174,22 +172,22 @@ trait JavaByteCodeConverter {
         method.visitLdcInsn(lit)
         //TODO - Should we convert to ProtocopterObject before returning?
         //TODO - Check to make sure we're not talking about BaseObject or other...  
-        method.visitMethodInsn(INVOKESTATIC, PENV_TYPE.getDescriptor(),"box",Type.getMethodDescriptor(POBJ_TYPE, Array(Type.getType(getClassForLiteral(lit)))))
+        method.visitMethodInsn(INVOKESTATIC, "org/protocopter/lang/core/ProtocopterEnvironment","box",Type.getMethodDescriptor(POBJ_TYPE, Array(Type.getType(getClassForLiteral(lit)))))
       case PushScopeInstruction() =>
         //Pull in the first-argument to this function which is our scope.
         method.visitVarInsn(ALOAD, 0)
       case SlotAccessInstruction() =>
         //TODO - Convert from proco-obj to a string first...?
-        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getDescriptor(), "lookup", Type.getMethodDescriptor(POBJ_TYPE, Array(POBJ_TYPE)))
+        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getInternalName(), "lookup", Type.getMethodDescriptor(POBJ_TYPE, Array(POBJ_TYPE)))
       case AssignSlot() =>
         //TODO - Convert from proco-obj to string first...?
-        method.visitMethodInsn(INVOKEVIRTUAL, Type.VOID_TYPE.getDescriptor(), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE, POBJ_TYPE)))
+        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getInternalName(), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE, POBJ_TYPE)))
       case PrototypeObject() =>
-        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getDescriptor(), "prototype", Type.getMethodDescriptor(POBJ_TYPE, Array()))
+        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getInternalName(), "prototype", Type.getMethodDescriptor(POBJ_TYPE, Array()))
       case PushCodeBlock(block) =>
-        //TODO - Write out code block as anonyomous subclass...
         //create new instance of code block subclass
-        method.visitTypeInsn(NEW, getTypeForClass(mangleCodeBlockName(name, idx)).getDescriptor)
+        //TODO - Make sure the name is correct...
+        method.visitTypeInsn(NEW, getInternalName(mangleCodeBlockName(name, idx)))
       case ExecuteFunction() =>
         //TODO - we need to understand how many argument there were, OR us varargs?
       case DeleteSlot() =>
