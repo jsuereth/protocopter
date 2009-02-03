@@ -80,11 +80,19 @@ trait JavaByteCodeConverter {
     //TODO - java main class should call "loadModule" method
     val mainMethod = clazz.visitMethod(ACC_PUBLIC | ACC_STATIC | ACC_VARARGS, "main", Type.getMethodDescriptor(Type.VOID_TYPE, Array(Type.getType(classOf[Array[String]]))), null, null)
     mainMethod.visitCode()
-    mainMethod.visitMethodInsn(INVOKESTATIC, PENV_TYPE.getDescriptor(),"current",Type.getMethodDescriptor(POBJ_TYPE, Array()))
+
+    mainMethod.visitFieldInsn(GETSTATIC, "java/lang/System","out",Type.getDescriptor(System.out.getClass))
+    mainMethod.visitLdcInsn("Loading Environment")
+    mainMethod.visitMethodInsn(INVOKEVIRTUAL, Type.getDescriptor(classOf[java.io.PrintStream]), "println", Type.getMethodDescriptor(Type.VOID_TYPE, Array(Type.getType(classOf[Object]))))
+    mainMethod.visitMethodInsn(INVOKESTATIC, PENV_TYPE.getInternalName,"current",Type.getMethodDescriptor(POBJ_TYPE, Array()))
     
     //TODO - Add script arguments to "scope" object from current... 
+    mainMethod.visitFieldInsn(GETSTATIC, "java/lang/System","out",Type.getDescriptor(System.out.getClass))
+    mainMethod.visitLdcInsn("Initializing Module")
+    mainMethod.visitMethodInsn(INVOKEVIRTUAL, Type.getDescriptor(classOf[java.io.PrintStream]), "println", Type.getMethodDescriptor(Type.VOID_TYPE, Array(Type.getType(classOf[Object]))))
     
-    mainMethod.visitMethodInsn(INVOKESTATIC, Type.getObjectType(name).getDescriptor(), "init", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE)))
+    
+    //mainMethod.visitMethodInsn(INVOKESTATIC, Type.getObjectType(name).getDescriptor(), "init", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE)))
     mainMethod.visitInsn(RETURN)
     //The actual values are calculated for us, we just need to call the visitor.
     mainMethod.visitMaxs(0,0)
@@ -106,7 +114,7 @@ trait JavaByteCodeConverter {
 //    moduleMethod.visitMethodInsn(INVOKEVIRTUAL, Type.getDescriptor(classOf[java.io.PrintStream]), "println", Type.getMethodDescriptor(Type.VOID_TYPE, Array(Type.getType(classOf[Object]))))
     moduleMethod.visitInsn(RETURN)
     //The actual values are calculated for us, we just need to call the visitor.
-    moduleMethod.visitMaxs(0,0)
+    moduleMethod.visitMaxs(0,1)
     moduleMethod.visitEnd()
     
     
@@ -133,7 +141,7 @@ trait JavaByteCodeConverter {
     constructor.visitEnd()
     
     //Write method impl 
-    val callMethod = clazz.visitMethod(ACC_PUBLIC | ACC_STATIC, "call",Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE)), null, null)
+    val callMethod = clazz.visitMethod(ACC_PUBLIC | ACC_STATIC, "call",Type.getMethodDescriptor(POBJ_TYPE, Array(POBJ_TYPE)), null, null)
     callMethod.visitCode()
     //TODO - Insert real code instead of
     var idx = 0;
@@ -142,6 +150,8 @@ trait JavaByteCodeConverter {
       if(pcode.isInstanceOf[PushCodeBlock]) { idx += 1 }
       convertInstruction(callMethod, pcode, name, idx)     
     }
+    //TODO - Pull "IT" slot from current scope?
+    callMethod.visitInsn(ARETURN)
     callMethod.visitMaxs(0,0)
     callMethod.visitEnd()
     

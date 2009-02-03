@@ -15,7 +15,7 @@ abstract class PrototypedObject(parent : ProtocopterObject) extends CoreObject {
  * The base object from which all others derive
  */
 object BaseObject extends CoreObject {
-  
+  override def toString = "BaseObject"
 }
 
 
@@ -53,7 +53,7 @@ abstract class CodeBlockObject extends PrototypedObject(BaseObject) with Protoco
 
 /** "Null" object */
 case class NilObject() extends CoreObject {
-  override def lookup(name : ProtocopterObject) : Option[ProtocopterObject] = throw new IllegalAccessError("cannot lookup slots on Nil") 
+  override def lookup(name : ProtocopterObject) : ProtocopterObject = throw new IllegalAccessError("cannot lookup slots on Nil") 
   override def prototype = throw new IllegalAccessError("cannot prototype Nil")
   override def set(name : ProtocopterObject, value : ProtocopterObject)  = throw new IllegalAccessError("cannot set a slot on Nil")
   override def remove(name : ProtocopterObject) = throw new IllegalAccessError("cannot remove slot from null!")

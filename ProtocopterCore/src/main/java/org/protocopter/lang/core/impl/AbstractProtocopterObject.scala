@@ -29,49 +29,47 @@ trait AbstractProtocopterObject extends ProtocopterObject with BoxingUtil {
     */
    protected def lookupOnParents(name : String) : Option[ProtocopterObject] = {
      /** Breadth-first search algorithm for slot lookup. */
-     def bfSearch(queue : Seq[AbstractProtocopterObject], seen : Set[AbstractProtocopterObject]) : Option[ProtocopterObject] = {
+     def bfSearch(queue : List[AbstractProtocopterObject], seen : Set[AbstractProtocopterObject]) : Option[ProtocopterObject] = {
+       Console.println("bfSearch( queue: " + queue + ", seen: " + seen + ")")
           queue match {
             // Check the head item
             case head :: tail =>
               //Make sure head is of appropriate class...
               if(head.slots.contains(name)) {
-                    Some(head.slots(name))
+                 Some(head.slots(name))
               } else {
-                 //Get next set of children and add them to quuee.
-                  val newChildren = for { 
-                     child <- head.getParents
-                     if !seen.contains(child)                      
-                  } yield child
+                //Get next set of parents and add them to quuee.
+                val newParents = for { 
+                    parent <- head.getParents
+                    if !seen.contains(parent)                      
+                } yield parent
                   //Continue on breadth-first search
-                  bfSearch(tail ++ newChildren, seen + head)
+                bfSearch(tail ++ newParents, seen + head)
               }              
             // No more items in queue...
             case Nil =>
               None
           }
-     }     
-     bfSearch(getParents, Set(this))
+     }    
+     bfSearch(getParents.toList, Set(this))
    }
    /**
     * Retreives our parents as a list
     */
    protected def getParents : Seq[AbstractProtocopterObject] = {
-     lookup(box("prototypes")).map(unboxSeq(_).asInstanceOf[Seq[AbstractProtocopterObject]]).getOrElse(List())
+     //DOn't use lookup method, as 1) it boxes and 2) it calls this method and 3) it's incorrect to do so.
+     slots.get("prototypes").map(unboxSeq(_).asInstanceOf[Seq[AbstractProtocopterObject]]).getOrElse({Console.println("no prototypes slot!"); List()})
    }
    /**
      * Looks up a slot from this object.
      */
-    def lookup(name : ProtocopterObject) : Option[ProtocopterObject] = {
+    override def lookup(name : ProtocopterObject) : ProtocopterObject = {
       unboxString(name) match {
-        case "prototypes" =>
-          //TODO - Do something special?
-          None
-        case ExistingSlot(value) => Some(value)
+        case ExistingSlot(value) => value
         case slotName @ _ =>
-          //TODO - lookup on parent          
-          lookupOnParents(slotName)
+          //TODO - call lookup slot if it exists
+          lookupOnParents(slotName).getOrElse(error("Slot not found: " + name))
       }
-      
     }
     /**
      * Removes a slot from this object
@@ -100,5 +98,8 @@ trait AbstractProtocopterObject extends ProtocopterObject with BoxingUtil {
 
     
     /** Creates a new protocopter object of the correct implementation type */
-    protected def createNewProtocopterObject : ProtocopterObject 
+    protected def createNewProtocopterObject : ProtocopterObject
+    
+    
+    override def toString = "ProtocopterObject(slots:" + slots.keySet.mkString("[",",","]") + ")"
 }

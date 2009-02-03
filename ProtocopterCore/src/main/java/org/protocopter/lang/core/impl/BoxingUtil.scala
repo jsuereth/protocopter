@@ -51,9 +51,8 @@ trait BoxingUtil {
   }
   
   def unboxSeq(obj : ProtocopterObject) : Seq[ProtocopterObject] = {
-    
     obj match {
-      case apo : AbstractProtocopterObject =>
+      case apo : AbstractProtocopterObject =>        
         /** Helper method to numerify the keyset */
         def numerifyKeys = apo.slots.keySet.filter {
           key => try {
@@ -74,10 +73,18 @@ trait BoxingUtil {
           
           def elements = new Iterator[ProtocopterObject] {
             val internalItr = numericSlots.iterator            
-            def hasNext = internalItr.hasNext
-            def next = apo.slots(internalItr.next.toString)
+            def hasNext = {  
+              val result = internalItr.hasNext
+              result
+            }
+            def next = {
+              val result = apo.slots(internalItr.next.toString)
+              result
+            }
           }
           def length = numericSlots.size
+          
+          override protected def stringPrefix = "ProtocopterBoxedSeq"
         }
       case _ => error("Unknown protocopter object type!")
     }

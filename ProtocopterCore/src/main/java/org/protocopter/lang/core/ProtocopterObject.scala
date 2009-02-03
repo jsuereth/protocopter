@@ -8,7 +8,7 @@ trait ProtocopterObject {
     /**
      * Looks up a slot from this object.
      */
-    def lookup(name : ProtocopterObject) : Option[ProtocopterObject]
+    def lookup(name : ProtocopterObject) : ProtocopterObject
     /**
      * Removes a slot from this object
      */
