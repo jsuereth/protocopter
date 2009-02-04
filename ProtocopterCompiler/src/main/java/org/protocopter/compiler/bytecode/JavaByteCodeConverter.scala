@@ -178,12 +178,12 @@ trait JavaByteCodeConverter {
         method.visitVarInsn(ALOAD, 0)
       case SlotAccessInstruction() =>
         //TODO - Convert from proco-obj to a string first...?
-        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getInternalName(), "lookup", Type.getMethodDescriptor(POBJ_TYPE, Array(POBJ_TYPE)))
+        method.visitMethodInsn(INVOKEINTERFACE, POBJ_TYPE.getInternalName(), "lookup", Type.getMethodDescriptor(POBJ_TYPE, Array(POBJ_TYPE)))
       case AssignSlot() =>
         //TODO - Convert from proco-obj to string first...?
-        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getInternalName(), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE, POBJ_TYPE)))
+        method.visitMethodInsn(INVOKEINTERFACE, POBJ_TYPE.getInternalName(), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE, POBJ_TYPE)))
       case PrototypeObject() =>
-        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getInternalName(), "prototype", Type.getMethodDescriptor(POBJ_TYPE, Array()))
+        method.visitMethodInsn(INVOKEINTERFACE, POBJ_TYPE.getInternalName(), "prototype", Type.getMethodDescriptor(POBJ_TYPE, Array()))
       case PushCodeBlock(block) =>
         //create new instance of code block subclass
         //TODO - Make sure the name is correct...
@@ -191,7 +191,7 @@ trait JavaByteCodeConverter {
       case ExecuteFunction() =>
         //TODO - we need to understand how many argument there were, OR us varargs?
       case DeleteSlot() =>
-        method.visitMethodInsn(INVOKEVIRTUAL, POBJ_TYPE.getDescriptor(), "remove", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE)))
+        method.visitMethodInsn(INVOKEINTERFACE, POBJ_TYPE.getDescriptor(), "remove", Type.getMethodDescriptor(Type.VOID_TYPE, Array(POBJ_TYPE)))
       case PushReferenceInstruction() =>
         //TODO - Isn't this the same as slot access?
       case _ => Console.println("Error... Unknown bytecode")

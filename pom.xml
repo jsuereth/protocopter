@@ -6,7 +6,10 @@
 	<packaging>pom</packaging>
 	<version>0.1-SNAPSHOT</version>
 	<name>Protocopter Language</name>
-
+	<organization>
+		<name>Protocopter</name>
+		<url>http://jsuereth.github.com/protocopter</url>
+	</organization>
 	<modules>
 		<module>ProtocopterCore</module>
 		<module>ProtocopterCompiler</module>
